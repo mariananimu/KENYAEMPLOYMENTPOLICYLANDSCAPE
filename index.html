@@ -1,0 +1,490 @@
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+.wrap{padding:1rem 0;font-family:var(--font-sans)}
+.tab-row{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:1.5rem}
+.tab{font-size:13px;padding:7px 16px;border-radius:20px;border:0.5px solid var(--color-border-secondary);background:transparent;color:var(--color-text-secondary);cursor:pointer;transition:all .15s}
+.tab.on{background:var(--color-text-primary);color:var(--color-background-primary);border-color:var(--color-text-primary);font-weight:500}
+.tab:hover:not(.on){border-color:var(--color-border-primary);color:var(--color-text-primary)}
+.panel{display:none}.panel.active{display:block}
+.intro{font-size:13px;color:var(--color-text-secondary);line-height:1.6;margin-bottom:1.25rem}
+.legend{display:flex;gap:16px;flex-wrap:wrap;margin-bottom:1.25rem;font-size:12px;color:var(--color-text-secondary)}
+.leg-dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:5px;vertical-align:middle}
+.card-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px}
+.pol-card{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:14px 16px}
+.pol-card .top-bar{height:3px;border-radius:3px;margin-bottom:10px}
+.pol-card h3{font-size:13px;font-weight:500;color:var(--color-text-primary);margin-bottom:3px}
+.pol-card .year{font-size:11px;color:var(--color-text-tertiary);margin-bottom:8px}
+.pol-card p{font-size:12px;color:var(--color-text-secondary);line-height:1.55}
+.badge{display:inline-block;font-size:10px;font-weight:500;padding:2px 9px;border-radius:10px;margin-top:9px}
+.s-active{background:#EAF3DE;color:#27500A}
+.s-partial{background:#FAEEDA;color:#633806}
+.s-draft{background:#E6F1FB;color:#0C447C}
+.s-stalled{background:#FCEBEB;color:#791F1F}
+.divider{border:none;border-top:0.5px solid var(--color-border-tertiary);margin:1.25rem 0}
+.section-label{font-size:10px;font-weight:500;letter-spacing:.07em;color:var(--color-text-tertiary);text-transform:uppercase;margin-bottom:12px}
+
+/* Progress bars */
+.bar-item{margin-bottom:6px}
+.bar-btn{width:100%;background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);padding:10px 14px;cursor:pointer;text-align:left;transition:all .15s;display:flex;align-items:center;gap:12px}
+.bar-btn:hover{border-color:var(--color-border-primary);background:var(--color-background-secondary)}
+.bar-btn.open{border-color:var(--color-border-primary);background:var(--color-background-secondary)}
+.bar-label-text{font-size:13px;color:var(--color-text-primary);min-width:220px;flex-shrink:0}
+.bar-track{flex:1;height:7px;background:var(--color-background-tertiary);border-radius:4px;overflow:hidden;min-width:60px}
+.bar-fill{height:7px;border-radius:4px}
+.bar-pct{font-size:12px;color:var(--color-text-secondary);min-width:32px;text-align:right}
+.bar-arrow{font-size:11px;color:var(--color-text-tertiary);transition:transform .2s;margin-left:4px}
+.bar-btn.open .bar-arrow{transform:rotate(180deg)}
+.evidence{display:none;border:0.5px solid var(--color-border-tertiary);border-top:none;border-radius:0 0 var(--border-radius-md) var(--border-radius-md);background:var(--color-background-secondary);padding:14px 16px;margin-bottom:0}
+.evidence.open{display:block}
+.ev-title{font-size:10px;font-weight:500;color:var(--color-text-tertiary);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px}
+.ev-point{display:flex;gap:10px;margin-bottom:9px;font-size:12px;line-height:1.55;color:var(--color-text-secondary)}
+.ev-point:last-child{margin-bottom:0}
+.ev-icon{flex-shrink:0;margin-top:1px;color:var(--color-text-tertiary);font-size:14px}
+.ev-source{display:inline-block;font-size:10px;color:var(--color-text-tertiary);border:0.5px solid var(--color-border-secondary);border-radius:8px;padding:1px 7px;margin-top:4px;vertical-align:middle;margin-left:4px}
+
+/* Bodies directory */
+.body-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px}
+.body-card{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);overflow:hidden;transition:border-color .15s}
+.body-card:hover{border-color:var(--color-border-primary)}
+.body-header{padding:14px 16px 0}
+.body-accent{height:3px;border-radius:3px;margin-bottom:12px}
+.body-row{display:flex;align-items:flex-start;gap:10px;margin-bottom:2px}
+.body-icon{width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:16px}
+.body-name{font-size:13px;font-weight:500;color:var(--color-text-primary);line-height:1.3}
+.body-abbr{font-size:11px;color:var(--color-text-tertiary);margin-top:2px}
+.body-meta{padding:10px 16px;display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.meta-item{font-size:11px;color:var(--color-text-secondary);line-height:1.4}
+.meta-label{font-size:10px;color:var(--color-text-tertiary);font-weight:500;text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:2px}
+.body-desc{padding:0 16px 12px;font-size:12px;color:var(--color-text-secondary);line-height:1.55}
+.body-footer{padding:10px 16px;border-top:0.5px solid var(--color-border-tertiary);display:flex;align-items:center;justify-content:space-between}
+.visit-link{font-size:12px;color:var(--color-text-info);text-decoration:none;display:flex;align-items:center;gap:4px;font-weight:500}
+.visit-link:hover{text-decoration:underline}
+.body-badge{font-size:10px;font-weight:500;padding:2px 8px;border-radius:10px}
+
+/* Overlaps */
+.ov-card{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:14px 16px;margin-bottom:10px}
+.ov-card h3{font-size:13px;font-weight:500;color:var(--color-text-primary);margin-bottom:5px}
+.ov-card p{font-size:12px;color:var(--color-text-secondary);line-height:1.55}
+.ov-tags{display:flex;flex-wrap:wrap;gap:5px;margin-top:9px}
+.otag{font-size:11px;padding:2px 9px;border-radius:10px;border:0.5px solid var(--color-border-secondary);color:var(--color-text-secondary)}
+
+/* Filter bar */
+.filter-row{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:1.25rem}
+.filter-btn{font-size:12px;padding:5px 12px;border-radius:16px;border:0.5px solid var(--color-border-secondary);background:transparent;color:var(--color-text-secondary);cursor:pointer;transition:all .15s}
+.filter-btn.on{background:var(--color-background-secondary);color:var(--color-text-primary);border-color:var(--color-border-primary);font-weight:500}
+.filter-btn:hover:not(.on){border-color:var(--color-border-primary)}
+.hidden{display:none}
+</style>
+
+<div class="wrap">
+<div class="tab-row">
+  <button class="tab on" onclick="show('established',this)">Established policies</button>
+  <button class="tab" onclick="show('bodies',this)">Existing bodies & portals</button>
+  <button class="tab" onclick="show('proposed',this)">Proposed bodies & laws</button>
+  <button class="tab" onclick="show('timeline',this)">Implementation status</button>
+  <button class="tab" onclick="show('overlaps',this)">Overlapping priorities</button>
+</div>
+
+<!-- ESTABLISHED -->
+<div id="established" class="panel active">
+  <p class="intro">Five officially adopted instruments form the formal architecture for employment, skills and career guidance in Kenya.</p>
+  <div class="legend">
+    <span><span class="leg-dot" style="background:#639922"></span>Active / operational</span>
+    <span><span class="leg-dot" style="background:#EF9F27"></span>Partially implemented</span>
+  </div>
+  <div class="card-grid">
+    <div class="pol-card"><div class="top-bar" style="background:#639922"></div><h3>Kenya Vision 2030</h3><div class="year">Est. 2007 · Ministry of Planning</div><p>The overarching 25-year development blueprint. Employment and skills are embedded in the social and economic pillars, delivered through Medium Term Plans.</p><span class="badge s-active">Active — MTP IV underway</span></div>
+    <div class="pol-card"><div class="top-bar" style="background:#EF9F27"></div><h3>Sessional Paper No. 4 of 2013</h3><div class="year">Est. 2013 · Ministry of Labour</div><p>Foundational employment policy establishing the decent work agenda. Most institutional bodies recommended within it remain unestablished a decade later.</p><span class="badge s-partial">Partially implemented</span></div>
+    <div class="pol-card"><div class="top-bar" style="background:#EF9F27"></div><h3>National Skills Development Policy</h3><div class="year">Est. 2023 · Ministry of Labour</div><p>Addresses the skills mismatch between education and the labour market. Implementation framework published; the proposed Skills Council has not yet been formed.</p><span class="badge s-partial">Policy active, council pending</span></div>
+    <div class="pol-card"><div class="top-bar" style="background:#EF9F27"></div><h3>National Policy Framework on Career Guidance</h3><div class="year">Est. 2023 · Ministry of Labour</div><p>Professionalises career counselling. Digital quarterly reporting live on Kenya Skills Hub. Career Guidance Council proposed but not yet gazetted.</p><span class="badge s-partial">Guidelines active, council pending</span></div>
+    <div class="pol-card"><div class="top-bar" style="background:#639922"></div><h3>Public Service Internship Policy</h3><div class="year">Est. 2016 · Public Service Commission</div><p>Operational framework governing government-led internship placements. Active but limited to the public sector, leaving a private sector work-based learning gap.</p><span class="badge s-active">Active — public sector only</span></div>
+  </div>
+</div>
+
+<!-- BODIES & PORTALS -->
+<div id="bodies" class="panel">
+  <p class="intro">These are the operational institutions and portals that currently exist within Kenya's employment, skills and career guidance ecosystem — each clickable to its official site.</p>
+  <div class="filter-row">
+    <button class="filter-btn on" onclick="filterBodies('all',this)">All</button>
+    <button class="filter-btn" onclick="filterBodies('labour',this)">Labour & employment</button>
+    <button class="filter-btn" onclick="filterBodies('skills',this)">Skills & training</button>
+    <button class="filter-btn" onclick="filterBodies('portal',this)">Portals & platforms</button>
+  </div>
+  <div class="body-grid" id="bodyGrid">
+
+    <!-- NEA -->
+    <div class="body-card" data-cat="labour">
+      <div class="body-header">
+        <div class="body-accent" style="background:#639922"></div>
+        <div class="body-row">
+          <div class="body-icon" style="background:#EAF3DE;color:#27500A"><i class="ti ti-briefcase" aria-hidden="true"></i></div>
+          <div><div class="body-name">National Employment Authority</div><div class="body-abbr">NEA</div></div>
+        </div>
+      </div>
+      <div class="body-meta">
+        <div class="meta-item"><span class="meta-label">Established</span>April 2016</div>
+        <div class="meta-item"><span class="meta-label">Enabling law</span>NEA Act No. 3 of 2016</div>
+        <div class="meta-item"><span class="meta-label">Under</span>Ministry of Labour & Social Protection</div>
+        <div class="meta-item"><span class="meta-label">Type</span>Statutory authority</div>
+      </div>
+      <div class="body-desc">Created from the former National Employment Bureau. Registers job seekers and employers, links candidates to opportunities, provides labour market information, offers vocational guidance and policy advisory. Obligated to facilitate student internship placements in both public and private sectors.</div>
+      <div class="body-footer">
+        <a class="visit-link" href="https://nea.go.ke/web/" target="_blank"><i class="ti ti-external-link" aria-hidden="true"></i> nea.go.ke</a>
+        <span class="body-badge s-active">Operational</span>
+      </div>
+    </div>
+
+    <!-- NITA -->
+    <div class="body-card" data-cat="skills">
+      <div class="body-header">
+        <div class="body-accent" style="background:#185FA5"></div>
+        <div class="body-row">
+          <div class="body-icon" style="background:#E6F1FB;color:#0C447C"><i class="ti ti-tool" aria-hidden="true"></i></div>
+          <div><div class="body-name">National Industrial Training Authority</div><div class="body-abbr">NITA</div></div>
+        </div>
+      </div>
+      <div class="body-meta">
+        <div class="meta-item"><span class="meta-label">Established</span>2011 (revised 2012)</div>
+        <div class="meta-item"><span class="meta-label">Enabling law</span>Industrial Training Act Cap 237</div>
+        <div class="meta-item"><span class="meta-label">Under</span>Ministry of Labour & Social Protection</div>
+        <div class="meta-item"><span class="meta-label">Type</span>State corporation</div>
+      </div>
+      <div class="body-desc">Promotes quality and efficiency in industrial training across Kenya. Collects industrial training levies, develops curricula, accredits training institutions, awards Government Trade Test certificates, and integrates labour market information into skills development. Operates five industrial training centres nationwide.</div>
+      <div class="body-footer">
+        <a class="visit-link" href="https://www.nita.go.ke" target="_blank"><i class="ti ti-external-link" aria-hidden="true"></i> nita.go.ke</a>
+        <span class="body-badge s-active">Operational</span>
+      </div>
+    </div>
+
+    <!-- TVETA -->
+    <div class="body-card" data-cat="skills">
+      <div class="body-header">
+        <div class="body-accent" style="background:#185FA5"></div>
+        <div class="body-row">
+          <div class="body-icon" style="background:#E6F1FB;color:#0C447C"><i class="ti ti-school" aria-hidden="true"></i></div>
+          <div><div class="body-name">TVET Authority</div><div class="body-abbr">TVETA</div></div>
+        </div>
+      </div>
+      <div class="body-meta">
+        <div class="meta-item"><span class="meta-label">Established</span>2013 (board: April 2014)</div>
+        <div class="meta-item"><span class="meta-label">Enabling law</span>TVET Act No. 29 of 2013</div>
+        <div class="meta-item"><span class="meta-label">Under</span>Ministry of Education</div>
+        <div class="meta-item"><span class="meta-label">Type</span>State corporation</div>
+      </div>
+      <div class="body-desc">Regulates and coordinates all TVET training in Kenya through licensing, registration and accreditation of programmes, institutions and trainers. Successor to the Directorate of Technical Accreditation and Quality Assurance. Placed under the Ministry of Education's State Dept for TVET via Executive Order No. 1 of 2023.</div>
+      <div class="body-footer">
+        <a class="visit-link" href="https://www.tveta.go.ke" target="_blank"><i class="ti ti-external-link" aria-hidden="true"></i> tveta.go.ke</a>
+        <span class="body-badge s-active">Operational</span>
+      </div>
+    </div>
+
+    <!-- KNQA -->
+    <div class="body-card" data-cat="skills">
+      <div class="body-header">
+        <div class="body-accent" style="background:#854F0B"></div>
+        <div class="body-row">
+          <div class="body-icon" style="background:#FAEEDA;color:#633806"><i class="ti ti-certificate" aria-hidden="true"></i></div>
+          <div><div class="body-name">Kenya National Qualifications Authority</div><div class="body-abbr">KNQA</div></div>
+        </div>
+      </div>
+      <div class="body-meta">
+        <div class="meta-item"><span class="meta-label">Established</span>2015</div>
+        <div class="meta-item"><span class="meta-label">Enabling law</span>KNQF Act No. 22 of 2014</div>
+        <div class="meta-item"><span class="meta-label">Under</span>Ministry of Education</div>
+        <div class="meta-item"><span class="meta-label">Type</span>Statutory authority</div>
+      </div>
+      <div class="body-desc">Coordinates and harmonises all qualification levels across Kenya's education and training system. Accredits Qualification Awarding Bodies (universities, polytechnics, professional bodies), maintains the National Qualifications Database, and develops the Kenya National Qualifications Framework (KNQF) for international comparability.</div>
+      <div class="body-footer">
+        <a class="visit-link" href="https://knqa.go.ke" target="_blank"><i class="ti ti-external-link" aria-hidden="true"></i> knqa.go.ke</a>
+        <span class="body-badge s-active">Operational</span>
+      </div>
+    </div>
+
+    <!-- NPCC -->
+    <div class="body-card" data-cat="labour">
+      <div class="body-header">
+        <div class="body-accent" style="background:#EF9F27"></div>
+        <div class="body-row">
+          <div class="body-icon" style="background:#FAEEDA;color:#633806"><i class="ti ti-trending-up" aria-hidden="true"></i></div>
+          <div><div class="body-name">National Productivity & Competitiveness Centre</div><div class="body-abbr">NPCC</div></div>
+        </div>
+      </div>
+      <div class="body-meta">
+        <div class="meta-item"><span class="meta-label">Established</span>2016 (renamed)</div>
+        <div class="meta-item"><span class="meta-label">Basis</span>Executive Order No. 1 of 2016</div>
+        <div class="meta-item"><span class="meta-label">Under</span>Ministry of Labour & Social Protection</div>
+        <div class="meta-item"><span class="meta-label">Type</span>Government department (not statutory)</div>
+      </div>
+      <div class="body-desc">Formerly the Productivity Centre of Kenya. Promotes productivity improvement programmes in public and private sector organisations, conducts national productivity measurement, and influences policy on competitiveness. Operates as a department — not the independent statutory council proposed in the 2013 Sessional Paper.</div>
+      <div class="body-footer">
+        <a class="visit-link" href="https://www.labour.go.ke/departments" target="_blank"><i class="ti ti-external-link" aria-hidden="true"></i> labour.go.ke/departments</a>
+        <span class="body-badge s-partial">Partial — dept. only</span>
+      </div>
+    </div>
+
+    <!-- Public Service Commission -->
+    <div class="body-card" data-cat="labour">
+      <div class="body-header">
+        <div class="body-accent" style="background:#639922"></div>
+        <div class="body-row">
+          <div class="body-icon" style="background:#EAF3DE;color:#27500A"><i class="ti ti-building-community" aria-hidden="true"></i></div>
+          <div><div class="body-name">Public Service Commission</div><div class="body-abbr">PSC</div></div>
+        </div>
+      </div>
+      <div class="body-meta">
+        <div class="meta-item"><span class="meta-label">Established</span>2013 (Constitution 2010)</div>
+        <div class="meta-item"><span class="meta-label">Basis</span>Constitution of Kenya, 2010; PSC Act 2012</div>
+        <div class="meta-item"><span class="meta-label">Under</span>Constitutional commission — independent</div>
+        <div class="meta-item"><span class="meta-label">Type</span>Constitutional body</div>
+      </div>
+      <div class="body-desc">Manages human resources for the national government, including recruitment, promotion and discipline of public officers. Administers the Public Service Internship Policy (2016), placing graduates into structured internships within government ministries and agencies.</div>
+      <div class="body-footer">
+        <a class="visit-link" href="https://www.publicservice.go.ke" target="_blank"><i class="ti ti-external-link" aria-hidden="true"></i> publicservice.go.ke</a>
+        <span class="body-badge s-active">Operational</span>
+      </div>
+    </div>
+
+    <!-- Kenya Skills Hub -->
+    <div class="body-card" data-cat="portal">
+      <div class="body-header">
+        <div class="body-accent" style="background:#534AB7"></div>
+        <div class="body-row">
+          <div class="body-icon" style="background:#EEEDFE;color:#3C3489"><i class="ti ti-world" aria-hidden="true"></i></div>
+          <div><div class="body-name">Kenya Skills Hub</div><div class="body-abbr">posttraining.go.ke</div></div>
+        </div>
+      </div>
+      <div class="body-meta">
+        <div class="meta-item"><span class="meta-label">Launched</span>~2023–2024</div>
+        <div class="meta-item"><span class="meta-label">Basis</span>Career Guidance Framework 2023</div>
+        <div class="meta-item"><span class="meta-label">Managed by</span>State Dept for Labour & Skills Dev.</div>
+        <div class="meta-item"><span class="meta-label">Type</span>Government digital portal</div>
+      </div>
+      <div class="body-desc">The government's online platform implementing the 2023 Career Guidance Framework. Hosts the digitised quarterly reporting system for education and training institutions and public employment agencies. Collects standardised data on career guidance service delivery to enable evidence-based decision-making.</div>
+      <div class="body-footer">
+        <a class="visit-link" href="https://posttraining.go.ke" target="_blank"><i class="ti ti-external-link" aria-hidden="true"></i> posttraining.go.ke</a>
+        <span class="body-badge s-active">Live</span>
+      </div>
+    </div>
+
+    <!-- Labour Market Info System -->
+    <div class="body-card" data-cat="portal">
+      <div class="body-header">
+        <div class="body-accent" style="background:#534AB7"></div>
+        <div class="body-row">
+          <div class="body-icon" style="background:#EEEDFE;color:#3C3489"><i class="ti ti-chart-bar" aria-hidden="true"></i></div>
+          <div><div class="body-name">Labour Market Information System</div><div class="body-abbr">LMIS / labourmarket.go.ke</div></div>
+        </div>
+      </div>
+      <div class="body-meta">
+        <div class="meta-item"><span class="meta-label">Launched</span>~2019 (IOM supported)</div>
+        <div class="meta-item"><span class="meta-label">Basis</span>NEA Act 2016 / Sessional Paper 4, 2013</div>
+        <div class="meta-item"><span class="meta-label">Managed by</span>Ministry of Labour / NEA</div>
+        <div class="meta-item"><span class="meta-label">Type</span>Government data portal</div>
+      </div>
+      <div class="body-desc">Kenya's official labour market information repository. Hosts employment statistics, policy documents, labour laws, sector reports and occupational data. Linked to the NEA and designed to support evidence-based employment policy and planning at national and county levels.</div>
+      <div class="body-footer">
+        <a class="visit-link" href="https://labourmarket.go.ke" target="_blank"><i class="ti ti-external-link" aria-hidden="true"></i> labourmarket.go.ke</a>
+        <span class="body-badge s-active">Live</span>
+      </div>
+    </div>
+
+    <!-- Vision 2030 Delivery -->
+    <div class="body-card" data-cat="labour">
+      <div class="body-header">
+        <div class="body-accent" style="background:#639922"></div>
+        <div class="body-row">
+          <div class="body-icon" style="background:#EAF3DE;color:#27500A"><i class="ti ti-flag" aria-hidden="true"></i></div>
+          <div><div class="body-name">Vision 2030 Delivery Secretariat</div><div class="body-abbr">V2030DS</div></div>
+        </div>
+      </div>
+      <div class="body-meta">
+        <div class="meta-item"><span class="meta-label">Established</span>2008</div>
+        <div class="meta-item"><span class="meta-label">Basis</span>Kenya Vision 2030 (2007)</div>
+        <div class="meta-item"><span class="meta-label">Under</span>Office of the President</div>
+        <div class="meta-item"><span class="meta-label">Type</span>Government secretariat</div>
+      </div>
+      <div class="body-desc">Coordinates the implementation of Kenya Vision 2030 across ministries, departments and agencies. Tracks flagship projects under the economic, social and political pillars — including employment, skills and human capital development — through successive Medium Term Plans.</div>
+      <div class="body-footer">
+        <a class="visit-link" href="https://vision2030.go.ke" target="_blank"><i class="ti ti-external-link" aria-hidden="true"></i> vision2030.go.ke</a>
+        <span class="body-badge s-active">Operational</span>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- PROPOSED -->
+<div id="proposed" class="panel">
+  <p class="intro">These bodies and laws have been recommended in the 2013 and 2023 policy documents to resolve institutional fragmentation. None has been fully enacted.</p>
+  <hr class="divider">
+  <div class="section-label">Proposed institutional bodies</div>
+  <div class="card-grid">
+    <div class="pol-card"><div class="top-bar" style="background:#185FA5"></div><h3>National Skills Development Council</h3><div class="year">Proposed in 2023 Skills Policy</div><p>High-level body to coordinate training across ministries. Requires the NSDC Act to be enacted first. No council formed as of 2026.</p><span class="badge s-draft">Awaiting legislation</span></div>
+    <div class="pol-card"><div class="top-bar" style="background:#185FA5"></div><h3>National Career Guidance Council</h3><div class="year">Proposed in 2023 Career Guidance Framework</div><p>Multi-stakeholder advisory body to lead and professionalise career guidance nationally. Requires a Career Guidance Act.</p><span class="badge s-draft">Awaiting legislation</span></div>
+    <div class="pol-card"><div class="top-bar" style="background:#185FA5"></div><h3>National Sector Skills Councils</h3><div class="year">Proposed in 2023 Skills Policy</div><p>Sector-specific bodies aligning curricula to industry needs in ICT, manufacturing, hospitality etc. Pre-conditional on NSDC being established.</p><span class="badge s-draft">Pre-conditional on NSDC</span></div>
+    <div class="pol-card"><div class="top-bar" style="background:#A32D2D"></div><h3>National Productivity & Competitiveness Council</h3><div class="year">Proposed in Sessional Paper No. 4, 2013</div><p>NPCC (a department) exists as a partial substitute but the full statutory council has not been formed. Enabling bill at drafting stage — 10+ years on.</p><span class="badge s-stalled">Bill at drafting stage — 10+ yrs</span></div>
+  </div>
+  <hr class="divider">
+  <div class="section-label">Proposed legislation</div>
+  <div class="card-grid">
+    <div class="pol-card"><div class="top-bar" style="background:#185FA5"></div><h3>National Skills Development Act</h3><div class="year">Targeted 2024–2026</div><p>Legal instrument to anchor the NSDC and the 2023 Skills Policy. Broader education reform bills moved through Cabinet in Feb 2026 but no dedicated Skills Bill has been tabled.</p><span class="badge s-draft">Pre-parliamentary</span></div>
+    <div class="pol-card"><div class="top-bar" style="background:#A32D2D"></div><h3>Productivity & Competitiveness Authority Act</h3><div class="year">Recommended in 2013 Sessional Paper</div><p>Would anchor productivity interventions in law. Validated by stakeholders but remains at drafting stage as of 2025 — over a decade since first recommended.</p><span class="badge s-stalled">Validated but not tabled</span></div>
+    <div class="pol-card"><div class="top-bar" style="background:#EF9F27"></div><h3>Broad National Internship Policy</h3><div class="year">Gap identified in 2013 & 2023 documents</div><p>A unified policy covering public and private sector work-based learning is repeatedly called for but has not been produced.</p><span class="badge s-partial">Public sector only; private gap persists</span></div>
+    <div class="pol-card"><div class="top-bar" style="background:#185FA5"></div><h3>National Career Guidance Act</h3><div class="year">Proposed in 2023 Career Guidance Framework</div><p>Legal framework to formalise career services and underpin the Career Guidance Council. Identified in the coordination action plan but not yet drafted.</p><span class="badge s-draft">Awaiting drafting</span></div>
+  </div>
+</div>
+
+<!-- TIMELINE -->
+<div id="timeline" class="panel">
+  <p class="intro">Click any item to see the evidence behind its progress rating.</p>
+  <hr class="divider">
+  <div class="section-label">Established policies — operational depth</div>
+
+  <div class="bar-item">
+    <button class="bar-btn" onclick="toggleEv('ev1',this)"><span class="bar-label-text">Kenya Vision 2030</span><div class="bar-track"><div class="bar-fill" style="width:85%;background:#639922"></div></div><span class="bar-pct">85%</span><span class="bar-arrow">▼</span></button>
+    <div class="evidence" id="ev1"><div class="ev-title">Why 85% — supporting evidence</div>
+      <div class="ev-point"><span class="ev-icon"><i class="ti ti-check"></i></span><span>Implemented through four successive Medium Term Plans. SDGs mainstreamed into MTPs and county-level development plans; currently on MTP IV.<span class="ev-source">Kenya VNR 2020 / vision2030.go.ke</span></span></div>
+      <div class="ev-point"><span class="ev-icon"><i class="ti ti-check"></i></span><span>Flagship projects tracked via performance contracting at national and sub-national level.<span class="ev-source">vision2030.go.ke</span></span></div>
+      <div class="ev-point"><span class="ev-icon"><i class="ti ti-alert-triangle"></i></span><span>Not 100%: the Productivity Centre of Kenya was to be transformed into a National Productivity Council — it remains a government department, not an independent statutory body.<span class="ev-source">vision2030.go.ke / labour.go.ke</span></span></div>
+    </div>
+  </div>
+
+  <div class="bar-item">
+    <button class="bar-btn" onclick="toggleEv('ev2',this)"><span class="bar-label-text">Public Service Internship Policy 2016</span><div class="bar-track"><div class="bar-fill" style="width:75%;background:#639922"></div></div><span class="bar-pct">75%</span><span class="bar-arrow">▼</span></button>
+    <div class="evidence" id="ev2"><div class="ev-title">Why 75% — supporting evidence</div>
+      <div class="ev-point"><span class="ev-icon"><i class="ti ti-check"></i></span><span>Operationally active — the PSC runs structured graduate placements into government ministries on a regular cycle.<span class="ev-source">Public Service Commission Kenya</span></span></div>
+      <div class="ev-point"><span class="ev-icon"><i class="ti ti-alert-triangle"></i></span><span>Coverage is limited strictly to the public sector. Both the 2013 and 2023 policies explicitly call for a broader policy covering private sector work-based learning — unaddressed as of 2026.<span class="ev-source">Sessional Paper No. 4, 2013 / NSDP 2023</span></span></div>
+    </div>
+  </div>
+
+  <div class="bar-item">
+    <button class="bar-btn" onclick="toggleEv('ev3',this)"><span class="bar-label-text">Career Guidance Framework 2023</span><div class="bar-track"><div class="bar-fill" style="width:45%;background:#EF9F27"></div></div><span class="bar-pct">45%</span><span class="bar-arrow">▼</span></button>
+    <div class="evidence" id="ev3"><div class="ev-title">Why 45% — supporting evidence</div>
+      <div class="ev-point"><span class="ev-icon"><i class="ti ti-check"></i></span><span>National Guidelines published and digitised quarterly reporting system live on Kenya Skills Hub for education institutions and employment agencies.<span class="ev-source">labour.go.ke / posttraining.go.ke</span></span></div>
+      <div class="ev-point"><span class="ev-icon"><i class="ti ti-check"></i></span><span>State Department mandated under Executive Order No. 2 of 2023 to establish the institutional framework — providing a legal hook.<span class="ev-source">National Policy Framework on Career Guidance, 2023</span></span></div>
+      <div class="ev-point"><span class="ev-icon"><i class="ti ti-alert-triangle"></i></span><span>The National Career Guidance Council — the central governing body — has not been established or gazetted. The enabling Career Guidance Act has not been drafted.<span class="ev-source">labour.go.ke / KIPPRA repository</span></span></div>
+    </div>
+  </div>
+
+  <div class="bar-item">
+    <button class="bar-btn" onclick="toggleEv('ev4',this)"><span class="bar-label-text">Skills Development Policy 2023</span><div class="bar-track"><div class="bar-fill" style="width:35%;background:#EF9F27"></div></div><span class="bar-pct">35%</span><span class="bar-arrow">▼</span></button>
+    <div class="evidence" id="ev4"><div class="ev-title">Why 35% — supporting evidence</div>
+      <div class="ev-point"><span class="ev-icon"><i class="ti ti-check"></i></span><span>Formally published by the Ministry of Labour with implementation and M&E frameworks included.<span class="ev-source">labour.go.ke / KIPPRA repository</span></span></div>
+      <div class="ev-point"><span class="ev-icon"><i class="ti ti-check"></i></span><span>CBET implementation in TVET — a key plank — advancing with full transition targeted for 2025 under the 2025 CBET Policy Framework.<span class="ev-source">Ministry of Education CBET Policy 2025</span></span></div>
+      <div class="ev-point"><span class="ev-icon"><i class="ti ti-alert-triangle"></i></span><span>The NSDC — the policy's primary governance instrument — has not been formed. The enabling National Skills Development Act has not been tabled in Parliament as of June 2026.<span class="ev-source">labour.go.ke / Parliament of Kenya</span></span></div>
+    </div>
+  </div>
+
+  <div class="bar-item">
+    <button class="bar-btn" onclick="toggleEv('ev5',this)"><span class="bar-label-text">Sessional Paper No. 4 of 2013</span><div class="bar-track"><div class="bar-fill" style="width:25%;background:#EF9F27"></div></div><span class="bar-pct">25%</span><span class="bar-arrow">▼</span></button>
+    <div class="evidence" id="ev5"><div class="ev-title">Why 25% — supporting evidence</div>
+      <div class="ev-point"><span class="ev-icon"><i class="ti ti-check"></i></span><span>Informed subsequent instruments including the 2023 Skills and Career Guidance policies. The decent work agenda is referenced in national plans.<span class="ev-source">KIPPRA repository / ILO Kenya</span></span></div>
+      <div class="ev-point"><span class="ev-icon"><i class="ti ti-alert-triangle"></i></span><span>The NPCC, Productivity & Competitiveness Authority Act, and a broad national internship policy — all recommended in 2013 — remain unimplemented over a decade later.<span class="ev-source">Kenya News Agency / labour.go.ke</span></span></div>
+      <div class="ev-point"><span class="ev-icon"><i class="ti ti-alert-triangle"></i></span><span>The 2023 policies were partly necessitated by the failure to implement 2013 recommendations — generating successor documents rather than operational change.<span class="ev-source">NSDP 2023 situational analysis</span></span></div>
+    </div>
+  </div>
+
+  <hr class="divider">
+  <div class="section-label">Proposed bodies & legislation — progress toward enactment</div>
+
+  <div class="bar-item">
+    <button class="bar-btn" onclick="toggleEv('ev6',this)"><span class="bar-label-text">NPCC (productivity dept. — partial)</span><div class="bar-track"><div class="bar-fill" style="width:40%;background:#EF9F27"></div></div><span class="bar-pct">40%</span><span class="bar-arrow">▼</span></button>
+    <div class="evidence" id="ev6"><div class="ev-title">Why 40% — supporting evidence</div>
+      <div class="ev-point"><span class="ev-icon"><i class="ti ti-check"></i></span><span>NPCC exists as an operational government department under the Ministry of Labour, renamed from the Productivity Centre of Kenya in 2016 under Executive Order No. 1.<span class="ev-source">labour.go.ke / devolution.go.ke</span></span></div>
+      <div class="ev-point"><span class="ev-icon"><i class="ti ti-check"></i></span><span>Sessional Paper No. 3 of 2013 on National Productivity Policy approved by National Assembly on 4 August 2015.<span class="ev-source">labour.go.ke / NPCC</span></span></div>
+      <div class="ev-point"><span class="ev-icon"><i class="ti ti-alert-triangle"></i></span><span>The proposed independent statutory council has not been established. The enabling bill has been stakeholder-validated but remains at drafting stage as confirmed by the CS for Labour.<span class="ev-source">Kenya News Agency / labour.go.ke</span></span></div>
+    </div>
+  </div>
+
+  <div class="bar-item">
+    <button class="bar-btn" onclick="toggleEv('ev7',this)"><span class="bar-label-text">Career Guidance reporting system</span><div class="bar-track"><div class="bar-fill" style="width:35%;background:#185FA5"></div></div><span class="bar-pct">35%</span><span class="bar-arrow">▼</span></button>
+    <div class="evidence" id="ev7"><div class="ev-title">Why 35% — supporting evidence</div>
+      <div class="ev-point"><span class="ev-icon"><i class="ti ti-check"></i></span><span>Digitised quarterly reporting framework for education institutions and public employment agencies is live at posttraining.go.ke.<span class="ev-source">posttraining.go.ke / labour.go.ke</span></span></div>
+      <div class="ev-point"><span class="ev-icon"><i class="ti ti-alert-triangle"></i></span><span>This is a reporting tool, not a governance body. Without the National Career Guidance Council to act on the data, the system cannot drive systemic change alone.<span class="ev-source">National Policy Framework on Career Guidance, 2023</span></span></div>
+    </div>
+  </div>
+
+  <div class="bar-item">
+    <button class="bar-btn" onclick="toggleEv('ev8',this)"><span class="bar-label-text">National Skills Development Act / Bill</span><div class="bar-track"><div class="bar-fill" style="width:15%;background:#185FA5"></div></div><span class="bar-pct">15%</span><span class="bar-arrow">▼</span></button>
+    <div class="evidence" id="ev8"><div class="ev-title">Why 15% — supporting evidence</div>
+      <div class="ev-point"><span class="ev-icon"><i class="ti ti-check"></i></span><span>The 2023 Skills Policy explicitly targets development of the Act between 2024 and 2026, providing a stated timeline and conceptual foundation.<span class="ev-source">NSDP 2023, Chapter 4</span></span></div>
+      <div class="ev-point"><span class="ev-icon"><i class="ti ti-alert-triangle"></i></span><span>No dedicated National Skills Development Bill has been tabled in Parliament as of June 2026. Cabinet-approved education reform bills (Feb 2026) address TVET and curriculum but not the NSDC specifically.<span class="ev-source">Capital FM / Daily Nation, February 2026</span></span></div>
+    </div>
+  </div>
+
+  <div class="bar-item">
+    <button class="bar-btn" onclick="toggleEv('ev9',this)"><span class="bar-label-text">NSDC / National Career Guidance Council</span><div class="bar-track"><div class="bar-fill" style="width:10%;background:#185FA5"></div></div><span class="bar-pct">10%</span><span class="bar-arrow">▼</span></button>
+    <div class="evidence" id="ev9"><div class="ev-title">Why 10% — supporting evidence</div>
+      <div class="ev-point"><span class="ev-icon"><i class="ti ti-check"></i></span><span>Both councils are formally described in their respective 2023 policies with governance structures outlined — giving them conceptual existence and policy mandate.<span class="ev-source">NSDP 2023 / Career Guidance Framework 2023</span></span></div>
+      <div class="ev-point"><span class="ev-icon"><i class="ti ti-alert-triangle"></i></span><span>Neither has been gazetted, appointed or operationalised. Both depend entirely on enabling legislation that has not been tabled in Parliament.<span class="ev-source">Parliament of Kenya / labour.go.ke</span></span></div>
+    </div>
+  </div>
+
+  <div class="bar-item">
+    <button class="bar-btn" onclick="toggleEv('ev10',this)"><span class="bar-label-text">Productivity & Competitiveness Act</span><div class="bar-track"><div class="bar-fill" style="width:20%;background:#A32D2D"></div></div><span class="bar-pct">20%</span><span class="bar-arrow">▼</span></button>
+    <div class="evidence" id="ev10"><div class="ev-title">Why 20% — supporting evidence</div>
+      <div class="ev-point"><span class="ev-icon"><i class="ti ti-check"></i></span><span>The bill has been through stakeholder validation. The CS for Labour confirmed it exists and is at the "drafting stage."<span class="ev-source">Kenya News Agency</span></span></div>
+      <div class="ev-point"><span class="ev-icon"><i class="ti ti-alert-triangle"></i></span><span>First recommended in 2013. Being at "drafting stage" after over a decade indicates a structurally stalled process. Not tabled in Parliament.<span class="ev-source">KIPPRA / Sessional Paper No. 4, 2013</span></span></div>
+    </div>
+  </div>
+
+  <div class="bar-item">
+    <button class="bar-btn" onclick="toggleEv('ev11',this)"><span class="bar-label-text">Broad National Internship Policy</span><div class="bar-track"><div class="bar-fill" style="width:20%;background:#A32D2D"></div></div><span class="bar-pct">20%</span><span class="bar-arrow">▼</span></button>
+    <div class="evidence" id="ev11"><div class="ev-title">Why 20% — supporting evidence</div>
+      <div class="ev-point"><span class="ev-icon"><i class="ti ti-check"></i></span><span>The 2016 PSC internship policy provides a partial template. The gap is clearly identified and named across two policy cycles — 2013 and 2023.<span class="ev-source">PSC Kenya / NSDP 2023</span></span></div>
+      <div class="ev-point"><span class="ev-icon"><i class="ti ti-alert-triangle"></i></span><span>No unified public-private internship policy has been drafted or gazetted. The private sector remains outside any formal work-based learning framework.<span class="ev-source">Sessional Paper No. 4, 2013 / NSDP 2023</span></span></div>
+    </div>
+  </div>
+
+  <div class="bar-item">
+    <button class="bar-btn" onclick="toggleEv('ev12',this)"><span class="bar-label-text">National Career Guidance Act</span><div class="bar-track"><div class="bar-fill" style="width:5%;background:#A32D2D"></div></div><span class="bar-pct">5%</span><span class="bar-arrow">▼</span></button>
+    <div class="evidence" id="ev12"><div class="ev-title">Why 5% — supporting evidence</div>
+      <div class="ev-point"><span class="ev-icon"><i class="ti ti-check"></i></span><span>Named in the 2023 Career Guidance Framework coordination action plan as a required legislative step.<span class="ev-source">National Policy Framework on Career Guidance, 2023</span></span></div>
+      <div class="ev-point"><span class="ev-icon"><i class="ti ti-alert-triangle"></i></span><span>No drafting has been initiated or publicly reported as of June 2026. The least advanced of all proposed legislative instruments.<span class="ev-source">Parliament of Kenya / labour.go.ke</span></span></div>
+    </div>
+  </div>
+
+  <div class="legend" style="margin-top:16px">
+    <span><span class="leg-dot" style="background:#639922"></span>Operational</span>
+    <span><span class="leg-dot" style="background:#EF9F27"></span>In progress</span>
+    <span><span class="leg-dot" style="background:#185FA5"></span>Early / pre-legislative</span>
+    <span><span class="leg-dot" style="background:#A32D2D"></span>Stalled</span>
+  </div>
+</div>
+
+<!-- OVERLAPS -->
+<div id="overlaps" class="panel">
+  <p class="intro">Several themes recur simultaneously across multiple policies and proposed instruments — creating both coordination potential and fragmentation risk.</p>
+  <div class="ov-card"><h3>Skills mismatch between education and labour market</h3><p>All five established policies name this as a root problem. Three of the proposed institutions are specifically designed to resolve it — yet no single coordinating body is operational, so the diagnosis is widely shared while the remedy remains fragmented across multiple ministries.</p><div class="ov-tags"><span class="otag">Vision 2030</span><span class="otag">Sessional Paper 4, 2013</span><span class="otag">Skills Dev. Policy 2023</span><span class="otag">NSDC (proposed)</span><span class="otag">Sector Skills Councils (proposed)</span></div></div>
+  <div class="ov-card"><h3>School-to-work transition</h3><p>Named explicitly in both the 2013 Employment Policy and the 2023 Career Guidance Framework. The Public Service Internship Policy addresses a small slice. The gap for private sector work-based learning has been called out across two policy cycles and remains unresolved in 2026.</p><div class="ov-tags"><span class="otag">Sessional Paper 4, 2013</span><span class="otag">Career Guidance Framework 2023</span><span class="otag">PS Internship Policy 2016</span><span class="otag">Broad Internship Policy (proposed)</span></div></div>
+  <div class="ov-card"><h3>Institutional coordination vs. fragmentation</h3><p>Every major policy acknowledges that responsibilities are split across too many ministries with no overarching coordination body. Ironically, the proposed solution — four new councils and two new Acts — risks compounding the fragmentation if not sequenced carefully or housed under a single ministry mandate.</p><div class="ov-tags"><span class="otag">Sessional Paper 4, 2013</span><span class="otag">Skills Dev. Policy 2023</span><span class="otag">Career Guidance Framework 2023</span><span class="otag">NSDC (proposed)</span><span class="otag">NPCC (partial)</span><span class="otag">Career Guidance Council (proposed)</span></div></div>
+  <div class="ov-card"><h3>Professionalisation of career services</h3><p>Both the 2013 paper and the 2023 Career Guidance Framework call for career guidance to be treated as a formal profession with standards, licensing and training. The 2023 framework goes further with a proposed Council and Act — but the legal infrastructure is not yet in place.</p><div class="ov-tags"><span class="otag">Sessional Paper 4, 2013</span><span class="otag">Career Guidance Framework 2023</span><span class="otag">Career Guidance Council (proposed)</span><span class="otag">Career Guidance Act (proposed)</span></div></div>
+  <div class="ov-card"><h3>Productivity as a policy lever</h3><p>Vision 2030 and the 2013 Sessional Paper both anchor productivity as central to economic growth. A decade later only a government department (NPCC) exists in place of the proposed statutory council — and the enabling bill remains at stakeholder validation stage. The longest-standing implementation gap in the landscape.</p><div class="ov-tags"><span class="otag">Vision 2030</span><span class="otag">Sessional Paper 4, 2013</span><span class="otag">NPCC (partial)</span><span class="otag">Productivity & Competitiveness Act (stalled)</span></div></div>
+</div>
+
+</div>
+
+<script>
+function show(id,btn){
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('on'));
+  document.getElementById(id).classList.add('active');
+  btn.classList.add('on');
+}
+function toggleEv(id,btn){
+  const ev=document.getElementById(id);
+  const isOpen=ev.classList.contains('open');
+  document.querySelectorAll('.evidence').forEach(e=>e.classList.remove('open'));
+  document.querySelectorAll('.bar-btn').forEach(b=>b.classList.remove('open'));
+  if(!isOpen){ev.classList.add('open');btn.classList.add('open');}
+}
+function filterBodies(cat,btn){
+  document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  document.querySelectorAll('.body-card').forEach(card=>{
+    if(cat==='all'||card.dataset.cat===cat){card.classList.remove('hidden');}
+    else{card.classList.add('hidden');}
+  });
+}
+</script>
